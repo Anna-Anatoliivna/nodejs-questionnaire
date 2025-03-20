@@ -1,6 +1,9 @@
 import express from 'express';
 import { initMongoConnection } from './db/initMongoConnection.js';
-import { Questionnaire } from './models/questionnaire.js';
+import { Questionnaire } from './models/Questionnaire.js';
+import { env } from './utils/env.js';
+
+const PORT = Number(env('PORT', '3000'));
 
 const app = express();
 
@@ -14,11 +17,26 @@ app.get('/questionnaires', async (req, res) => {
   }
 });
 
+app.get('/questionnaires/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const questionnaire = await Questionnaire.findById(id);
+if (!questionnaire) {
+      return res.status(404).send('Questionnaire not found');
+    }
+
+    res.json(questionnaire);
+  } catch (error) {
+    console.log('Error while fetching questionnaires', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 const bootstrap = async () => {
   try {
     await initMongoConnection();
-    app.listen(8080, () => {
-      console.log('Server is running on port 8080');
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
   } catch (error) {
     console.log('Error while connecting to MongoDB', error);
