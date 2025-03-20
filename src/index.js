@@ -1,4 +1,7 @@
 import express from 'express';
+import pino from 'pino-http';
+import cors from 'cors';
+
 import { initMongoConnection } from './db/initMongoConnection.js';
 import { Questionnaire } from './models/Questionnaire.js';
 import { env } from './utils/env.js';
@@ -6,6 +9,15 @@ import { env } from './utils/env.js';
 const PORT = Number(env('PORT', '3000'));
 
 const app = express();
+
+app.use(cors());
+app.use(
+  pino({
+    transport: {
+      target: 'pino-pretty',
+    },
+  }),
+);
 
 app.get('/questionnaires', async (req, res) => {
   try {
